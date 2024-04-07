@@ -1,6 +1,8 @@
 package com.example.publicdataserver.batch;
 
+import com.example.publicdataserver.domain.PublicData;
 import com.example.publicdataserver.dto.PublicDataDto;
+import com.example.publicdataserver.repository.PublicDataRepository;
 import com.example.publicdataserver.util.PublicDataUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,15 +41,24 @@ public class PublicDataBatchConfigTest {
     }
 
     @Bean
-    public Tasklet tasklet() {
+    public Tasklet tasklet(PublicDataRepository publicDataRepository) {
         return ((contribution, chunkContext) -> {
             List<PublicDataDto> publicDataDtoList = publicDataUtils.getPublicDataAsDtoList();
 
             for (PublicDataDto publicDataDto : publicDataDtoList) {
-                log.info("제목 : " + publicDataDto.getTitle());
-                log.info("목적 : " + publicDataDto.getExecPurpose());
-                log.info("목적 : " + publicDataDto.getExecAmount());
+                PublicData publicData = PublicData.builder()
+                        .title(publicDataDto.getTitle())
+                        .deptNm(publicDataDto.getDeptNm())
+                        .url(publicDataDto.getUrl())
+                        .execDt(publicDataDto.getExecDt())
+                        .execLoc(publicDataDto.getExecLoc())
+                        .execPurpose(publicDataDto.getExecPurpose())
+                        .execAmount(publicDataDto.getExecAmount())
+                        .build();
+
+                publicDataRepository.save(publicData);
             }
+
             return RepeatStatus.FINISHED;
         });
     }

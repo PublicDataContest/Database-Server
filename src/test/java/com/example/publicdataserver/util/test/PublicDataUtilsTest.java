@@ -17,8 +17,6 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest
-@ActiveProfiles("test")
 @Slf4j
 public class PublicDataUtilsTest {
     @InjectMocks
