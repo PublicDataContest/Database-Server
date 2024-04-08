@@ -19,7 +19,7 @@ public class PublicDataUtils {
 
     WebClient webClient;
 
-    public JsonNode getPublicDataSync() {
+    public JsonNode getPublicDataSync(int start, int end) {
 
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
@@ -34,7 +34,7 @@ public class PublicDataUtils {
                         .host("openapi.seoul.go.kr")
                         .port(8088)
                         .path("/{KEY}/json/odExpense/{START_INDEX}/{END_INDEX}")
-                        .build(authkey, 1, 1000))
+                        .build(authkey, start, end))
                 .retrieve()
                 .bodyToMono(String.class)
                 .block(); // 동기적으로 결과를 얻음
@@ -51,8 +51,8 @@ public class PublicDataUtils {
         }
     }
 
-    public List<PublicDataDto> getPublicDataAsDtoList() {
-        JsonNode jsonNode = getPublicDataSync();
+    public List<PublicDataDto> getPublicDataAsDtoList(int start, int end) {
+        JsonNode jsonNode = getPublicDataSync(start, end);
 
         if (jsonNode != null && jsonNode.has("odExpense")) {
             JsonNode arrayNode = jsonNode.get("odExpense").get("row");

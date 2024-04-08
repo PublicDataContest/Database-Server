@@ -43,23 +43,30 @@ public class PublicDataBatchConfigTest {
     @Bean
     public Tasklet tasklet(PublicDataRepository publicDataRepository) {
         return ((contribution, chunkContext) -> {
-            List<PublicDataDto> publicDataDtoList = publicDataUtils.getPublicDataAsDtoList();
+            for(int start = 1; start <= 56_000; start += 1000) {
+                int end = start + 999;
+                end = Math.min(end, 57_000);
 
-            for (PublicDataDto publicDataDto : publicDataDtoList) {
-                PublicData publicData = PublicData.builder()
-                        .title(publicDataDto.getTitle())
-                        .deptNm(publicDataDto.getDeptNm())
-                        .url(publicDataDto.getUrl())
-                        .execDt(publicDataDto.getExecDt())
-                        .execLoc(publicDataDto.getExecLoc())
-                        .execPurpose(publicDataDto.getExecPurpose())
-                        .execAmount(publicDataDto.getExecAmount())
-                        .build();
-
-                publicDataRepository.save(publicData);
+                saveData(publicDataUtils.getPublicDataAsDtoList(start, end), publicDataRepository);
             }
 
             return RepeatStatus.FINISHED;
         });
+    }
+
+    private void saveData(List<PublicDataDto> publicDataDtoList, PublicDataRepository publicDataRepository) {
+        for (PublicDataDto publicDataDto : publicDataDtoList) {
+            PublicData publicData = PublicData.builder()
+                    .title(publicDataDto.getTitle())
+                    .deptNm(publicDataDto.getDeptNm())
+                    .url(publicDataDto.getUrl())
+                    .execDt(publicDataDto.getExecDt())
+                    .execLoc(publicDataDto.getExecLoc())
+                    .execPurpose(publicDataDto.getExecPurpose())
+                    .execAmount(publicDataDto.getExecAmount())
+                    .build();
+
+            publicDataRepository.save(publicData);
+        }
     }
 }
