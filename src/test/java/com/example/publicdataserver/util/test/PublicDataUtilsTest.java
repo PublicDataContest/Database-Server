@@ -28,7 +28,7 @@ public class PublicDataUtilsTest {
         // given
 
         // when
-        final JsonNode result = target.getPublicDataSync();
+        final JsonNode result = target.getPublicDataSync(1, 1000);
 
         // then
         log.info("result = {}", result.toString());
@@ -40,7 +40,7 @@ public class PublicDataUtilsTest {
         // given
 
         // when
-        final List<PublicDataDto> result = target.getPublicDataAsDtoList();
+        final List<PublicDataDto> result = target.getPublicDataAsDtoList(1, 1000);
 
         // then
         assertThat(result.size()).isEqualTo(1000);
