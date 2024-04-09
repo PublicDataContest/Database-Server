@@ -21,7 +21,7 @@ public class KakaoApiUtilsTest {
         // given
 
         // when
-        final JsonNode result = target.getKakaoDataSync("진짜무릎도가니탕푸주옥 서울 영등포구 대림로 171");
+        final JsonNode result = target.getKakaoDataSync("");
 
         // then
         log.info("result = {}", result.toString());
