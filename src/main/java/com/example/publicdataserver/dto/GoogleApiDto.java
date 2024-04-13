@@ -51,9 +51,6 @@ public class GoogleApiDto {
         @ToString
         @JsonIgnoreProperties(ignoreUnknown = true)
         public static class CurrentOpeningHours {
-            @JsonProperty("open_now")
-            private Boolean openNow;
-
             @JsonProperty("weekday_text")
             private List<String> weekdayText;
         }

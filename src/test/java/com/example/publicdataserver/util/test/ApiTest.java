@@ -53,6 +53,7 @@ public class ApiTest {
 
         // then
         log.info("DTO = {}", googlePlaceDetailsInfo.toString());
+        log.info("weekDays = {}", googlePlaceDetailsInfo.getCurrentOpeningHours().getWeekdayText().get(0));
         log.info("Review List = {}", googlePlaceDetailsInfo.getReviews().size());
         log.info("result = {}", result.toString());
     }

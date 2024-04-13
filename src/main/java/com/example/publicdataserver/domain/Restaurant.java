@@ -20,6 +20,7 @@ public class Restaurant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String execLoc;
     private String addressName;
     private String categoryGroupName;
     private String categoryName;
@@ -31,6 +32,9 @@ public class Restaurant {
     private String y;
 
     private Integer rating;
+
+    @Column(columnDefinition = "TEXT")
+    private String currentOpeningHours;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reviews> reviews = new ArrayList<>();
