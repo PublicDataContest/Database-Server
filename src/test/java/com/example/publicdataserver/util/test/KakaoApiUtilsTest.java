@@ -1,6 +1,6 @@
 package com.example.publicdataserver.util.test;
 
-import com.example.publicdataserver.util.KakaoApiUtils;
+import com.example.publicdataserver.util.KakaoPlaceApiUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Slf4j
 public class KakaoApiUtilsTest {
     @InjectMocks
-    private KakaoApiUtils target;
+    private KakaoPlaceApiUtils target;
 
     @Test
     @DisplayName("카카오_API_연동_테스트")
@@ -21,7 +21,7 @@ public class KakaoApiUtilsTest {
         // given
 
         // when
-        final JsonNode result = target.getKakaoDataSync("");
+        final JsonNode result = target.parseJson(target.getKakaoDataSync("대한민국 서울특별시 중구 남대문로1길 11 송옥"));
 
         // then
         log.info("result = {}", result.toString());
