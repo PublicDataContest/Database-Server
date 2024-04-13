@@ -23,10 +23,19 @@ public class GooglePlaceIdApiUtils {
 
     /**
      * @param location (위치 정보)
-     * @return placeId (가게 고유 ID 값)
+     * @return placeId (가게 고유 ID 값), or null if not found.
      */
     public String getPlaceId(String location) {
-        return getGooglePlaceIdInfoDataSync(location).get("places").get(0).get("id").asText();
+        try {
+            JsonNode placesNode = getGooglePlaceIdInfoDataSync(location).path("places");
+            if (placesNode.isArray() && placesNode.size() > 0) {
+                JsonNode placeIdNode = placesNode.get(0).path("id");
+                return placeIdNode.isTextual() ? placeIdNode.asText() : null;
+            }
+        } catch (Exception e) {
+            return null;  // 예외 발생 시 null 반환
+        }
+        return null;
     }
 
     public JsonNode getGooglePlaceIdInfoDataSync(String location) {

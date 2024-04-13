@@ -21,7 +21,6 @@ public class KakaoPlaceApiUtils {
         return parseKakaoPlaceDetailsDto(getKakaoDataSync(location));
     }
 
-
     public String getKakaoDataSync(String location) {
 
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();

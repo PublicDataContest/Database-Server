@@ -21,6 +21,8 @@ public class Reviews {
     private String profilePhotoUrl;
     private Integer rating;
     private String relativeTimeDescription;
+
+    @Column(columnDefinition = "TEXT")
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -8,8 +8,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @Slf4j
 public class GoogleApiUtilsTest {
 
@@ -37,7 +39,7 @@ public class GoogleApiUtilsTest {
     @DisplayName("Google_장소_ID_기반_장소_검색")
     public void Google_장소_ID_기반_장소_검색() {
         // given
-        String query = "송옥(중구 남대문로1길 11)";
+        String query = "라그릴리아광화문점(종로구 청계천로 11)";
         JsonNode placeIdNode = googleApiUtils.getGooglePlaceIdInfoDataSync(query);
         log.info("PlaceIdNode = {}", placeIdNode.toString());
         String placeId = placeIdNode.get("places").get(0).get("id").asText();
@@ -45,6 +47,11 @@ public class GoogleApiUtilsTest {
 
         // when
         JsonNode result = googlePlaceInfoUtils.parseJson(googlePlaceInfoUtils.getGooglePlaceInfoDataSync(placeId));
+        JsonNode ratingNode = result.path("result").path("rating");
+        if (!ratingNode.isMissingNode()) {
+            int rating = ratingNode.asInt();
+            log.info("rating = {}", rating);
+        }
 
         // then
         log.info("Result = {}", result.toString());
