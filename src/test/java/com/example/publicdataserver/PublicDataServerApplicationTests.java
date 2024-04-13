@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("production")
+@ActiveProfiles("test")
 @EnableScheduling
 class PublicDataServerApplicationTests {
 

@@ -21,6 +21,9 @@ public class GoogleApiDto {
         @JsonProperty("name")
         private String name;
 
+        @JsonProperty("current_opening_hours")
+        private CurrentOpeningHours currentOpeningHours;
+
         @JsonProperty("rating")
         private Integer rating;
 
@@ -44,6 +47,17 @@ public class GoogleApiDto {
 
             @JsonProperty("text")
             private String text;
+        }
+
+        @Getter
+        @ToString
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class CurrentOpeningHours {
+            @JsonProperty("open_now")
+            private Boolean openNow;
+
+            @JsonProperty("weekday_text")
+            private List<String> weekdayText;
         }
     }
 }
