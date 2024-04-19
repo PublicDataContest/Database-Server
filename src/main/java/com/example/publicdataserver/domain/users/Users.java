@@ -25,8 +25,5 @@ public class Users {
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GoogleReviews> reviews = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WishListRestaurant> wishListRestaurants = new ArrayList<>();
 }

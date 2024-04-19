@@ -27,11 +27,13 @@ public class Restaurant {
     private String phone;
     private String placeName;
     private String placeUrl;
+    private String photo;
 
     private String x;
     private String y;
 
     private Integer rating;
+    private String storeId;
 
     @Column(columnDefinition = "TEXT")
     private String currentOpeningHours;

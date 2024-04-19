@@ -27,4 +27,7 @@ public class PublicDataDto {
 
     @JsonProperty("EXEC_AMOUNT")
     private String execAmount; // 집행금액
+
+    @JsonProperty("EXEC_MONTH")
+    private String execMonth; // 집행 월
 }

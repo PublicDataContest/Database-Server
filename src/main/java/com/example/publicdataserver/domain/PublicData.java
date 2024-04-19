@@ -22,4 +22,5 @@ public class PublicData {
     private String execLoc; // 집행장소
     private String targetNm; // 인원 수
     private String execAmount; // 집행금액
+    private String execMonth; // 집행 월
 }
