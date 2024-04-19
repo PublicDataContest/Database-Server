@@ -27,6 +27,9 @@ public class GoogleApiDto {
         @JsonProperty("rating")
         private Integer rating;
 
+        @JsonProperty("photos")
+        private List<Photo> photos;
+
         private List<ReviewsInfo> reviews;
 
         @Getter
@@ -58,6 +61,20 @@ public class GoogleApiDto {
 
             @JsonProperty("weekday_text")
             private List<String> weekdayText;
+        }
+
+        @Getter
+        @ToString
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class Photo {
+            @JsonProperty("photo_reference")
+            private String photoReference;
+
+            @JsonProperty("height")
+            private Integer height;
+
+            @JsonProperty("width")
+            private Integer width;
         }
     }
 }

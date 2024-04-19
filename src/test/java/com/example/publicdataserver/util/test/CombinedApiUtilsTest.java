@@ -29,12 +29,12 @@ public class CombinedApiUtilsTest {
     @DisplayName("Google Places API와 카카오 API 연동 테스트")
     public void testCombinedApis() {
         // Google Places API 사용
-        String googleQuery = "서궁(종로구 새문안로 35-20)";
+        String googleQuery = "평가옥(종로구 우정국로 2)";
         JsonNode googleResult = googlePlaceIdApiUtils.getGooglePlaceIdInfoDataSync(googleQuery);
         log.info("Google Result: {}", googleResult.toString());
 
         // Google 결과에서 formattedAddress 추출
-        String formattedAddress = googleResult.get("places").get(0).get("formattedAddress").asText();
+        String formattedAddress = googleResult.get("places").get(0).get("formatted_address").asText();
 
         // 추출된 주소를 카카오 API에 사용
         JsonNode kakaoResult = kakaoApiUtils.parseJson(kakaoApiUtils.getKakaoDataSync(formattedAddress));
