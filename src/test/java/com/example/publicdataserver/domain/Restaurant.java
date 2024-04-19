@@ -34,5 +34,8 @@ public class Restaurant {
     private Integer rating;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Menu> menus = new ArrayList<>();
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reviews> reviews = new ArrayList<>();
 }

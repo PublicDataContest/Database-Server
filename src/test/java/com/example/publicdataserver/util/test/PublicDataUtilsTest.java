@@ -28,7 +28,7 @@ public class PublicDataUtilsTest {
         // given
 
         // when
-        final JsonNode result = target.getPublicDataSync(1, 1000);
+        final JsonNode result = target.getPublicDataSync(1, 10);
 
         // then
         log.info("result = {}", result.toString());

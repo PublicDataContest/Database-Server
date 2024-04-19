@@ -22,7 +22,7 @@ public class GoogleApiUtilsTest {
     @DisplayName("Google Places API 텍스트 검색 테스트")
     public void testSearchPlacesByText() {
         // given
-        String query = "서궁(종로구 새문안로 35-20)";
+        String query = "라그릴리아광화문점(종로구 청계천로 11)";
 
         // when
         JsonNode result = googleApiUtils.getGooglePlaceIdInfoDataSync(query);
@@ -43,7 +43,7 @@ public class GoogleApiUtilsTest {
         JsonNode placeIdNode = googleApiUtils.getGooglePlaceIdInfoDataSync(query);
         log.info("PlaceIdNode = {}", placeIdNode.toString());
         String placeId = placeIdNode.get("places").get(0).get("id").asText();
-        log.info("Places = {}", placeId);
+        log.info("PlacesId = {}", placeId);
 
         // when
         JsonNode result = googlePlaceInfoUtils.parseJson(googlePlaceInfoUtils.getGooglePlaceInfoDataSync(placeId));
