@@ -1,6 +1,6 @@
 package com.example.publicdataserver.repository;
 
-import com.example.publicdataserver.domain.Restaurant;
+import com.example.publicdataserver.domain.restaurant.Restaurant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

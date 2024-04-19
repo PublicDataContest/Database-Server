@@ -1,4 +1,4 @@
-package com.example.publicdataserver.domain;
+package com.example.publicdataserver.domain.users;
 
 import com.example.publicdataserver.domain.restaurant.Restaurant;
 import jakarta.persistence.*;
@@ -8,21 +8,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
-public class Reviews {
+public class WishListRestaurant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String authorName;
-    private String profilePhotoUrl;
-    private Integer rating;
-    private String relativeTimeDescription;
-    private String text;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private Users user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id")

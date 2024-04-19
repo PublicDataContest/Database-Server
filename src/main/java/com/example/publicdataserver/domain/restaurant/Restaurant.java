@@ -1,5 +1,7 @@
-package com.example.publicdataserver.domain;
+package com.example.publicdataserver.domain.restaurant;
 
+import com.example.publicdataserver.domain.review.GoogleReviews;
+import com.example.publicdataserver.domain.users.WishListRestaurant;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,8 +24,6 @@ public class Restaurant {
 
     private String execLoc;
     private String addressName;
-    private String categoryGroupName;
-    private String categoryName;
     private String phone;
     private String placeName;
     private String placeUrl;
@@ -37,5 +37,15 @@ public class Restaurant {
     private String currentOpeningHours;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Reviews> reviews = new ArrayList<>();
+    private List<GoogleReviews> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Category> categories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Menu> menus = new ArrayList<>();
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WishListRestaurant> wishListRestaurants = new ArrayList<>();
+
 }

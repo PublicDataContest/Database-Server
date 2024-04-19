@@ -1,4 +1,4 @@
-package com.example.publicdataserver.domain;
+package com.example.publicdataserver.domain.users;
 
 import com.example.publicdataserver.domain.review.GoogleReviews;
 import jakarta.persistence.*;
@@ -12,27 +12,21 @@ import java.util.List;
 
 @Entity
 @Table
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Getter
-public class Restaurant {
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String addressName;
-    private String categoryGroupName;
-    private String categoryName;
-    private String phone;
-    private String placeName;
-    private String placeUrl;
+    private String userId;
+    private String password;
 
-    private String x;
-    private String y;
-
-    private Integer rating;
-
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GoogleReviews> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WishListRestaurant> wishListRestaurants = new ArrayList<>();
 }

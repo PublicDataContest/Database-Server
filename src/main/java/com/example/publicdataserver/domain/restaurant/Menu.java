@@ -1,4 +1,4 @@
-package com.example.publicdataserver.domain;
+package com.example.publicdataserver.domain.restaurant;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,14 +12,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PublicData {
+public class Menu {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String deptNm; // 부서명
-    private String execDt; // 집행일시
-    private String execLoc; // 집행장소
-    private String targetNm; // 인원 수
-    private String execAmount; // 집행금액
+    private String menu;
+    private String price;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant;
 }

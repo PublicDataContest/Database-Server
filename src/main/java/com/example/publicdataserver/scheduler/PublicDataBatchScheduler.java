@@ -14,7 +14,7 @@ public class PublicDataBatchScheduler {
     private final JobLauncher jobLauncher;
     private final Job job;
 
-    @Scheduled(cron = "0 59 23 * * *") // 매일 저녁 11시 59분에 실행
+    @Scheduled(cron = "0 59 23 1 * ?")
     public void runJob() throws Exception {
         JobParameters parameters = new JobParametersBuilder()
                 .addString("publicDataSave", "publicDataJob" + System.currentTimeMillis())

@@ -13,24 +13,18 @@ import lombok.ToString;
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PublicDataDto {
-    @JsonProperty("TITLE")
-    private String title;
-
     @JsonProperty("DEPT_NM")
-    private String deptNm;
-
-    @JsonProperty("URL")
-    private String url;
+    private String deptNm; // 부서명
 
     @JsonProperty("EXEC_DT")
-    private String execDt;
+    private String execDt; // 집행일시
 
     @JsonProperty("EXEC_LOC")
-    private String execLoc;
+    private String execLoc; // 집행장소
 
-    @JsonProperty("EXEC_PURPOSE")
-    private String execPurpose;
+    @JsonProperty("TARGET_NM")
+    private String targetNm; // 인원 수
 
     @JsonProperty("EXEC_AMOUNT")
-    private String execAmount;
+    private String execAmount; // 집행금액
 }
