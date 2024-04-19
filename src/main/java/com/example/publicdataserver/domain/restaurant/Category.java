@@ -18,6 +18,7 @@ public class Category {
 
     private String categoryGroupName;
     private String categoryName;
+    private String hashTags;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id")
