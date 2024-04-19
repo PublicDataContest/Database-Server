@@ -34,5 +34,7 @@ public class KakaoApiDto {
 
         @JsonProperty("y")
         private String y;
+        @JsonProperty("id")
+        private String storeId;
     }
 }
