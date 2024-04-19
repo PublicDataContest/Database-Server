@@ -21,7 +21,7 @@ public class KakaoApiUtilsTest {
         // given
 
         // when
-        final JsonNode result = target.parseJson(target.getKakaoDataSync("대한민국 서울특별시 중구 남대문로1길 11 송옥"));
+        final JsonNode result = target.parseJson(target.getKakaoDataSync("대한민국 서울특별시 종로구 청계천로 11 2층 라그릴리아 광화문점"));
 
         // then
         log.info("result = {}", result.toString());

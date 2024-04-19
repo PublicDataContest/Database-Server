@@ -33,7 +33,7 @@ public class GooglePlaceDetailsApiUtils {
                 .path("/maps/api/place/details/json")
                 .queryParam("place_id", placeId)
                 .queryParam("language", "ko")
-                .queryParam("fields", "name,formatted_address,rating,reviews,current_opening_hours")
+                .queryParam("fields", "name,formatted_address,rating,reviews,current_opening_hours,photos")
                 .queryParam("key", "AIzaSyBTcYS8E3PCQwOyHPDsrk2RM_GcTKsN24c")
                 .build()
                 .encode();
