@@ -34,9 +34,6 @@ public class GoogleApiDto {
             @JsonProperty("author_name")
             private String authorName;
 
-            @JsonProperty("profile_photo_url")
-            private String profilePhotoUrl;
-
             @JsonProperty("rating")
             private Integer rating;
 
