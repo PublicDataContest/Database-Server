@@ -17,8 +17,8 @@ public class SeasonsStatistics {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Long restaurantId;
+
 
     @ColumnDefault("0")
     private Long spring;

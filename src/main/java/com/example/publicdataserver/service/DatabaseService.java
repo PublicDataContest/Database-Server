@@ -8,6 +8,10 @@ import com.example.publicdataserver.domain.review.GoogleReviews;
 import com.example.publicdataserver.dto.GoogleApiDto;
 import com.example.publicdataserver.dto.KakaoApiDto;
 import com.example.publicdataserver.repository.*;
+import com.example.publicdataserver.repository.statistics.PeopleStatisticsRepository;
+import com.example.publicdataserver.repository.statistics.SeasonStatisticsRepository;
+import com.example.publicdataserver.service.Statistics.PeopleStatisticsService;
+import com.example.publicdataserver.service.Statistics.SeasonStatisticsService;
 import com.example.publicdataserver.util.GooglePlaceDetailsApiUtils;
 import com.example.publicdataserver.util.GooglePlaceIdApiUtils;
 import com.example.publicdataserver.util.KakaoPlaceApiUtils;
@@ -44,7 +48,8 @@ public class DatabaseService {
     private final MenuRepository menuRepository;
     private final CategoryRepository categoryRepository;
 
-    private final StatisticsService statisticsService;
+    private final SeasonStatisticsService seasonStatisticsService;
+    private final PeopleStatisticsService peopleStatisticsService;
 
     private static final String API_URL = "https://place.map.kakao.com/main/v/";
 
@@ -90,8 +95,12 @@ public class DatabaseService {
                 saveMenuAndCategory(kakaoPlaceDetails, restaurant);
 
                 // Statistics 저장
-                statisticsService.updateSeasonStatistics(location, restaurant.getId());
+                seasonStatisticsService.updateSeasonStatistics(location, restaurant.getId());
                 log.info("+++++++++++++++++++");
+
+                peopleStatisticsService.updatePeopleStatistics(location, restaurant.getId());
+                log.info("+++++++++++++++++++");
+
 
             } catch (Exception e) {
                 log.info("Last Exception Occurs");
