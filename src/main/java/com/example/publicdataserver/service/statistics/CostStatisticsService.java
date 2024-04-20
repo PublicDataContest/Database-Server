@@ -1,4 +1,4 @@
-package com.example.publicdataserver.service.Statistics;
+package com.example.publicdataserver.service.statistics;
 
 import com.example.publicdataserver.domain.PublicData;
 import com.example.publicdataserver.domain.statistics.CostsStatistics;

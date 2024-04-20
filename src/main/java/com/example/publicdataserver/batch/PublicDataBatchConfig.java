@@ -69,8 +69,8 @@ public class PublicDataBatchConfig {
 //                }
 //            }
 
-            int start = 1;
-            int end = 10;
+            int start = 500;
+            int end = 510;
 
                 List<PublicDataDto> publicDataDtos
                         = publicDataUtils.getPublicDataAsDtoList(start, end);
@@ -102,11 +102,8 @@ public class PublicDataBatchConfig {
     @Bean
     public Tasklet tasklet2(PublicDataRepository publicDataRepository) throws IOException {
         System.out.println("heelo");
-        //databaseService.saveData();
-//        return ((contribution, chunkContext) -> {return RepeatStatus.FINISHED;});
         return ((contribution, chunkContext) -> {
             databaseService.saveData();
-            System.out.println("sibal________________________");
 
             return RepeatStatus.FINISHED;
         });
