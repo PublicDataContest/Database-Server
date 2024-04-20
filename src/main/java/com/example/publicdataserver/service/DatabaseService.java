@@ -8,8 +8,7 @@ import com.example.publicdataserver.domain.review.GoogleReviews;
 import com.example.publicdataserver.dto.GoogleApiDto;
 import com.example.publicdataserver.dto.KakaoApiDto;
 import com.example.publicdataserver.repository.*;
-import com.example.publicdataserver.repository.statistics.PeopleStatisticsRepository;
-import com.example.publicdataserver.repository.statistics.SeasonStatisticsRepository;
+import com.example.publicdataserver.service.Statistics.CostStatisticsService;
 import com.example.publicdataserver.service.Statistics.PeopleStatisticsService;
 import com.example.publicdataserver.service.Statistics.SeasonStatisticsService;
 import com.example.publicdataserver.util.GooglePlaceDetailsApiUtils;
@@ -50,6 +49,7 @@ public class DatabaseService {
 
     private final SeasonStatisticsService seasonStatisticsService;
     private final PeopleStatisticsService peopleStatisticsService;
+    private final CostStatisticsService costStatisticsService;
 
     private static final String API_URL = "https://place.map.kakao.com/main/v/";
 
@@ -101,6 +101,7 @@ public class DatabaseService {
                 peopleStatisticsService.updatePeopleStatistics(location, restaurant.getId());
                 log.info("+++++++++++++++++++");
 
+                costStatisticsService.updateCostStatistics(location, restaurant.getId());
 
             } catch (Exception e) {
                 log.info("Last Exception Occurs");

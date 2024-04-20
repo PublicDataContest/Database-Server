@@ -17,6 +17,8 @@ public class CostsStatistics {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long restaurantId;
+
 
     @ColumnDefault("0")
     private Long lower10000;
