@@ -28,7 +28,9 @@ public class Restaurant {
     private String phone;
     private String placeName;
     private String placeUrl;
-    private String photo;
+
+    @Column(columnDefinition = "TEXT")
+    private String photoUrl;
 
     private String x;
     private String y;

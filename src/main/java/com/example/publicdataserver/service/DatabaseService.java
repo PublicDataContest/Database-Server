@@ -25,6 +25,7 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -52,7 +53,11 @@ public class DatabaseService {
     private final CostStatisticsService costStatisticsService;
     private final TimeStatisticsService timeStatisticsService;
 
+    @Value("${google.authKey}")
+    private String authkey;
+
     private static final String API_URL = "https://place.map.kakao.com/main/v/";
+    private static final String PHOTO_URL = "https://places.googleapis.com/v1/";
 
     public void saveData() throws IOException {
         List<PublicData> publicDatas = publicDataRepository.findAll();
@@ -125,6 +130,12 @@ public class DatabaseService {
             openingHours.append("영업 시간 정보가 없습니다.");
         }
 
+        String photoUrl = "";
+        if (googlePlaceDetails.getPhoto() != null) {
+            photoUrl = PHOTO_URL + googlePlaceDetails.getPhoto().getPhotoName() +
+                    "/media?key=" + authkey + "&maxHeightPx=1000";
+        }
+
         Restaurant restaurant = Restaurant.builder()
                 .execLoc(location)
                 .addressName(kakaoPlaceDetails.getAddressName())
@@ -134,6 +145,7 @@ public class DatabaseService {
                 .x(kakaoPlaceDetails.getX())
                 .y(kakaoPlaceDetails.getY())
                 .storeId(kakaoPlaceDetails.getStoreId())
+                .photoUrl(photoUrl)
                 .rating(googlePlaceDetails.getRating())
                 .currentOpeningHours(openingHours.toString())
                 .build();

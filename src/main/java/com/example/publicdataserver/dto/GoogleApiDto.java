@@ -2,6 +2,7 @@ package com.example.publicdataserver.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -40,6 +41,16 @@ public class GoogleApiDto {
 
         @JsonProperty("displayName")
         private DisplayName displayName;
+
+        @JsonProperty("photos")
+        private Photo photo;
+
+        @JsonSetter("photos")
+        public void setFirstPhoto(List<Photo> photos) {
+            if (photos != null && !photos.isEmpty()) {
+                this.photo = photos.get(0);
+            }
+        }
     }
 
     @Getter
@@ -89,5 +100,13 @@ public class GoogleApiDto {
     public static class DisplayName {
         @JsonProperty("text")
         private String name;
+    }
+
+    @Getter
+    @ToString
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Photo {
+        @JsonProperty("name")
+        private String photoName;
     }
 }
