@@ -90,7 +90,7 @@ public class DatabaseService {
                 saveMenuAndCategory(kakaoPlaceDetails, restaurant);
 
                 // Statistics 저장
-                statisticsService.updateSeasonStatistics(location);
+                statisticsService.updateSeasonStatistics(location, restaurant.getId());
                 log.info("+++++++++++++++++++");
 
             } catch (Exception e) {

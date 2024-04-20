@@ -1,12 +1,11 @@
 package com.example.publicdataserver.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class StatisticsDto {
     private Long spring;
     private Long summer;
