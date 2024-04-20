@@ -42,21 +42,24 @@ public class CostStatisticsService {
             costStatisticsDto = convertEntityToDto(costsStatistics.get());
         }
         Optional<PeopleStatistics> peopleStatistics=peopleStatisticsRepository.findByRestaurantId(restaurantId);
+        long totalPeople=peopleStatistics.get().getLower5()+peopleStatistics.get().getLower10()
+                +peopleStatistics.get().getLower20()+peopleStatistics.get().getUpper20();
+
         for(PublicData data:publicData){
-            long totalPeople=peopleStatistics.get().getLower5()+peopleStatistics.get().getLower10()
-                    +peopleStatistics.get().getLower20()+peopleStatistics.get().getUpper20();
-            long cost = Long.parseLong(data.getExecAmount()) / totalPeople;
+            long execAmount=Long.parseLong(data.getExecAmount());
+            long cost = execAmount / totalPeople;
+
             if(cost<=10000){
-                costStatisticsDto.setLower10000(cost);
+                costStatisticsDto.setLower10000(costStatisticsDto.getLower10000() + 1);
             }
             else if(cost<=15000){
-                costStatisticsDto.setLower15000(cost);
+                costStatisticsDto.setLower15000(costStatisticsDto.getLower15000() + 1);
             }
             else if(cost<=20000){
-                costStatisticsDto.setLower20000(cost);
+                costStatisticsDto.setLower20000(costStatisticsDto.getLower20000() + 1);
             }
             else{
-                costStatisticsDto.setUpper20000(cost);
+                costStatisticsDto.setUpper20000(costStatisticsDto.getUpper20000() + 1);
             }
 
         }
