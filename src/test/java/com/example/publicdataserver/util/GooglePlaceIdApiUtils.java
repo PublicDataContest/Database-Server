@@ -1,11 +1,9 @@
 package com.example.publicdataserver.util;
 
 import com.example.publicdataserver.dto.GoogleApiDto;
-import com.example.publicdataserver.dto.PublicDataDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -31,7 +29,7 @@ public class GooglePlaceIdApiUtils {
                         .queryParam("languageCode", "ko")
                         .build())
                 .header("X-Goog-Api-Key", "AIzaSyAIlAcqTIwnp9YOoygz3VsHYfNR578HsUY")
-                .header("X-Goog-FieldMask", "places.formatted_address,places.rating,places.regularOpeningHours.weekdayDescriptions,places.reviews.relativePublishTimeDescription,places.reviews.rating,places.reviews.text.text,places.reviews.authorAttribution.displayName")
+                .header("X-Goog-FieldMask", "places.formatted_address,places.rating,places.regularOpeningHours.weekdayDescriptions,places.reviews.relativePublishTimeDescription,places.reviews.rating,places.reviews.text.text,places.reviews.authorAttribution.displayName,places.displayName.text")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(requestBody))
                 .retrieve()

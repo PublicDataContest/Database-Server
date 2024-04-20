@@ -20,7 +20,7 @@ public class Reviews {
     private Long id;
 
     private String authorName; // 작성자 이름
-    private Integer rating; // 별점
+    private Double rating; // 별점
     private String relativeTimeDescription; // 작성 시간
 
     @Column(columnDefinition = "TEXT")

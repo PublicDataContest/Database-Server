@@ -30,13 +30,16 @@ public class GoogleApiDto {
         private String formattedAddress;
 
         @JsonProperty("rating")
-        private Integer rating;
+        private Double rating;
 
         @JsonProperty("regularOpeningHours")
         private CurrentOpeningHours CurrentOpeningHours;
 
         @JsonProperty("reviews")
         private List<ReviewsInfo> reviews;
+
+        @JsonProperty("displayName")
+        private DisplayName displayName;
     }
 
     @Getter
@@ -78,5 +81,13 @@ public class GoogleApiDto {
     public static class AuthorAttribution {
         @JsonProperty("displayName")
         private String authorName;
+    }
+
+    @Getter
+    @ToString
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class DisplayName {
+        @JsonProperty("text")
+        private String name;
     }
 }
