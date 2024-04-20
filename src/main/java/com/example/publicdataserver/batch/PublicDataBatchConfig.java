@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.io.IOException;
 import java.util.List;
 
 @Configuration
@@ -99,7 +100,10 @@ public class PublicDataBatchConfig {
     }
 
     @Bean
-    public Tasklet tasklet2(PublicDataRepository publicDataRepository) {
+    public Tasklet tasklet2(PublicDataRepository publicDataRepository) throws IOException {
+        System.out.println("heelo");
+        databaseService.saveData();
+//        return ((contribution, chunkContext) -> {return RepeatStatus.FINISHED;});
         return ((contribution, chunkContext) -> {
             databaseService.saveData();
 

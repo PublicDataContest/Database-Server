@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,6 +33,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public class DatabaseService {
+    private final Logger logger = LoggerFactory.getLogger(DatabaseService.class);
     private final GooglePlaceIdApiUtils googlePlaceIdApiUtils;
     private final GooglePlaceDetailsApiUtils googlePlaceDetailsApiUtils;
     private final KakaoPlaceApiUtils kakaoPlaceApiUtils;
@@ -40,6 +43,8 @@ public class DatabaseService {
     private final GoogleReviewsRepository googleReviewsRepository;
     private final MenuRepository menuRepository;
     private final CategoryRepository categoryRepository;
+
+    private final StatisticsService statisticsService;
 
     private static final String API_URL = "https://place.map.kakao.com/main/v/";
 
@@ -85,6 +90,8 @@ public class DatabaseService {
                 saveMenuAndCategory(kakaoPlaceDetails, restaurant);
 
                 // Statistics 저장
+                statisticsService.updateSeasonStatistics(location);
+                log.info("+++++++++++++++++++");
 
             } catch (Exception e) {
                 log.info("Last Exception Occurs");
