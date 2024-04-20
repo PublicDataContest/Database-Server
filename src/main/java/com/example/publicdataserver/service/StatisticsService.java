@@ -1,6 +1,7 @@
 package com.example.publicdataserver.service;
 
 import com.example.publicdataserver.domain.PublicData;
+import com.example.publicdataserver.domain.restaurant.Restaurant;
 import com.example.publicdataserver.domain.statistics.SeasonsStatistics;
 import com.example.publicdataserver.dto.StatisticsDto;
 import com.example.publicdataserver.repository.PublicDataRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hibernate.query.sqm.tree.SqmNode.log;
 
@@ -23,13 +25,27 @@ public class StatisticsService {
     private StatisticsRepository seasonsStatisticsRepository;
 
     @Transactional
-    public void updateSeasonStatistics(String execLoc) {
+    public void updateSeasonStatistics(String execLoc, Long restaurantId) {
         try{
-            log.debug("execLoc : " + execLoc);
-            List<PublicData> publicDatas = publicDataRepository.findPublicDataByExecLoc(execLoc);
-            StatisticsDto statisticsDto = new StatisticsDto(0L, 0L, 0L, 0L);
+//            log.debug("execLoc : " + execLoc);
+//            List<PublicData> publicDatas = publicDataRepository.findPublicDataByExecLoc(execLoc);
+//            StatisticsDto statisticsDto = new StatisticsDto(0L, 0L, 0L, 0L);
 
-            for (PublicData data : publicDatas) {
+            List<PublicData> publicDatas = publicDataRepository.findPublicDataByExecLoc(execLoc); // public Datas 찾고
+            Optional<SeasonsStatistics> seasonsStatistics = seasonsStatisticsRepository.findByRestaurantId(restaurantId); // 해당 Restaurant에 대한 통계 찾고
+            StatisticsDto statisticsDto = null;
+            if(seasonsStatistics.isEmpty()) {
+                statisticsDto = statisticsDto.builder()
+                        .spring(0L)
+                        .summer(0L)
+                        .fall(0L)
+                        .winter(0L)
+                        .build();
+            } else {
+                statisticsDto = convertEntityToEDto(seasonsStatistics.get());
+            }
+
+            for (PublicData data : publicDatas) { // data 돌면서 갱신
                 switch (data.getExecMonth()) {
                     case "03": case "04": case "05":
                         statisticsDto.setSpring(statisticsDto.getSpring() + 1);
@@ -46,7 +62,7 @@ public class StatisticsService {
                 }
             }
 
-            SeasonsStatistics statistics = convertDTOToEntity(statisticsDto);
+            SeasonsStatistics statistics = convertDTOToEntity(statisticsDto, restaurantId);
             seasonsStatisticsRepository.save(statistics);
             log.info("저장된 통계:" + statistics);
         } catch (Exception e) {
@@ -56,12 +72,22 @@ public class StatisticsService {
 
     }
 
-    private SeasonsStatistics convertDTOToEntity(StatisticsDto dto) {
+    private StatisticsDto convertEntityToEDto(SeasonsStatistics entity) {
+        return StatisticsDto.builder()
+                .spring(entity.getSpring())
+                .summer(entity.getSummer())
+                .fall(entity.getFall())
+                .winter(entity.getWinter())
+                .build();
+    }
+
+    private SeasonsStatistics convertDTOToEntity(StatisticsDto dto, Long restaurantId) {
         return SeasonsStatistics.builder()
                 .spring(dto.getSpring())
                 .summer(dto.getSummer())
                 .fall(dto.getFall())
                 .winter(dto.getWinter())
+                .restaurantId(restaurantId)
                 .build();
     }
 }
