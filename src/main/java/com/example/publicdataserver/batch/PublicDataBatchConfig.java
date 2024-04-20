@@ -102,10 +102,11 @@ public class PublicDataBatchConfig {
     @Bean
     public Tasklet tasklet2(PublicDataRepository publicDataRepository) throws IOException {
         System.out.println("heelo");
-        databaseService.saveData();
+        //databaseService.saveData();
 //        return ((contribution, chunkContext) -> {return RepeatStatus.FINISHED;});
         return ((contribution, chunkContext) -> {
             databaseService.saveData();
+            System.out.println("sibal________________________");
 
             return RepeatStatus.FINISHED;
         });

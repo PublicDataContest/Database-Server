@@ -1,11 +1,10 @@
-package com.example.publicdataserver.service;
+package com.example.publicdataserver.service.Statistics;
 
 import com.example.publicdataserver.domain.PublicData;
-import com.example.publicdataserver.domain.restaurant.Restaurant;
 import com.example.publicdataserver.domain.statistics.SeasonsStatistics;
-import com.example.publicdataserver.dto.StatisticsDto;
+import com.example.publicdataserver.dto.statistic.SeasonStatisticsDto;
 import com.example.publicdataserver.repository.PublicDataRepository;
-import com.example.publicdataserver.repository.StatisticsRepository;
+import com.example.publicdataserver.repository.statistics.SeasonStatisticsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,24 +15,20 @@ import java.util.Optional;
 import static org.hibernate.query.sqm.tree.SqmNode.log;
 
 @Service
-public class StatisticsService {
+public class SeasonStatisticsService {
 
     @Autowired
     private PublicDataRepository publicDataRepository;
 
     @Autowired
-    private StatisticsRepository seasonsStatisticsRepository;
+    private SeasonStatisticsRepository seasonsStatisticsRepository;
 
     @Transactional
     public void updateSeasonStatistics(String execLoc, Long restaurantId) {
         try{
-//            log.debug("execLoc : " + execLoc);
-//            List<PublicData> publicDatas = publicDataRepository.findPublicDataByExecLoc(execLoc);
-//            StatisticsDto statisticsDto = new StatisticsDto(0L, 0L, 0L, 0L);
-
             List<PublicData> publicDatas = publicDataRepository.findPublicDataByExecLoc(execLoc); // public Datas 찾고
             Optional<SeasonsStatistics> seasonsStatistics = seasonsStatisticsRepository.findByRestaurantId(restaurantId); // 해당 Restaurant에 대한 통계 찾고
-            StatisticsDto statisticsDto = null;
+            SeasonStatisticsDto statisticsDto = null;
             if(seasonsStatistics.isEmpty()) {
                 statisticsDto = statisticsDto.builder()
                         .spring(0L)
@@ -72,8 +67,8 @@ public class StatisticsService {
 
     }
 
-    private StatisticsDto convertEntityToEDto(SeasonsStatistics entity) {
-        return StatisticsDto.builder()
+    private SeasonStatisticsDto convertEntityToEDto(SeasonsStatistics entity) {
+        return SeasonStatisticsDto.builder()
                 .spring(entity.getSpring())
                 .summer(entity.getSummer())
                 .fall(entity.getFall())
@@ -81,7 +76,7 @@ public class StatisticsService {
                 .build();
     }
 
-    private SeasonsStatistics convertDTOToEntity(StatisticsDto dto, Long restaurantId) {
+    private SeasonsStatistics convertDTOToEntity(SeasonStatisticsDto dto, Long restaurantId) {
         return SeasonsStatistics.builder()
                 .spring(dto.getSpring())
                 .summer(dto.getSummer())
