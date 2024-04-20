@@ -33,7 +33,7 @@ public class CostStatisticsService {
         CostStatisticsDto costStatisticsDto = null;
         if (costsStatistics.isEmpty()) {
             costStatisticsDto = costStatisticsDto.builder()
-                    .lower15000(0L)
+                    .lower10000(0L)
                     .lower15000(0L)
                     .lower20000(0L)
                     .upper20000(0L)
