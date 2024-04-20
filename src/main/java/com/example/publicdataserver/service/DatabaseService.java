@@ -8,9 +8,13 @@ import com.example.publicdataserver.domain.review.GoogleReviews;
 import com.example.publicdataserver.dto.GoogleApiDto;
 import com.example.publicdataserver.dto.KakaoApiDto;
 import com.example.publicdataserver.repository.*;
-import com.example.publicdataserver.util.GooglePlaceDetailsApiUtils;
-import com.example.publicdataserver.util.GooglePlaceIdApiUtils;
+import com.example.publicdataserver.service.statistics.CostStatisticsService;
+import com.example.publicdataserver.service.statistics.PeopleStatisticsService;
+import com.example.publicdataserver.service.statistics.SeasonStatisticsService;
+import com.example.publicdataserver.service.statistics.TimeStatisticsService;
+import com.example.publicdataserver.util.GooglePlaceApiUtils;
 import com.example.publicdataserver.util.KakaoPlaceApiUtils;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -19,6 +23,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,8 +38,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public class DatabaseService {
-    private final GooglePlaceIdApiUtils googlePlaceIdApiUtils;
-    private final GooglePlaceDetailsApiUtils googlePlaceDetailsApiUtils;
+    private final Logger logger = LoggerFactory.getLogger(DatabaseService.class);
+    private final GooglePlaceApiUtils googlePlaceApiUtils;
     private final KakaoPlaceApiUtils kakaoPlaceApiUtils;
 
     private final PublicDataRepository publicDataRepository;
@@ -41,42 +48,49 @@ public class DatabaseService {
     private final MenuRepository menuRepository;
     private final CategoryRepository categoryRepository;
 
+    private final SeasonStatisticsService seasonStatisticsService;
+    private final PeopleStatisticsService peopleStatisticsService;
+    private final CostStatisticsService costStatisticsService;
+    private final TimeStatisticsService timeStatisticsService;
+
+    @Value("${google.authKey}")
+    private String authkey;
+
     private static final String API_URL = "https://place.map.kakao.com/main/v/";
+    private static final String PHOTO_URL = "https://places.googleapis.com/v1/";
 
     public void saveData() throws IOException {
         List<PublicData> publicDatas = publicDataRepository.findAll();
         Set<String> locations = new HashSet<>();
 
-        for(PublicData publicData : publicDatas) locations.add(publicData.getExecLoc());
+        for (PublicData publicData : publicDatas) locations.add(publicData.getExecLoc());
 
-        for(String location : locations) {
+        for (String textQuery : locations) {
             try {
-                // PlaceId 값 추출
-                String placeId = googlePlaceIdApiUtils.getPlaceId(location);
-                if (placeId == null) {
-                    log.info("Google Place Id Load Fail: " + location);
+                // Google 데이터 추출
+                JsonNode googlePlaceJsonNode = googlePlaceApiUtils.getGooglePlaceIdInfoDataSync(textQuery);
+                GoogleApiDto googleApiDto = googlePlaceApiUtils.convertJsonToGoogleApiDto(googlePlaceJsonNode);
+                GoogleApiDto.Place googlePlaceDetails = googleApiDto.getFirstPlace();
+                if (googlePlaceDetails == null) {
+                    log.error("No place found in the response");
                     continue;
                 }
-
-                // Google Data 값 추출
-                GoogleApiDto.GooglePlaceDetailsDto googlePlaceDetails
-                        = googlePlaceDetailsApiUtils.getGooglePlaceDetailsInfo(placeId);
-                if (googlePlaceDetails == null) {
-                    log.info("Google Place Details Load Fail for location: " + placeId);
+                if (googlePlaceDetails.getRating() == null) {
+                    log.error("Rating is NULL");
                     continue;
                 }
 
                 // Kakao 데이터 추출
                 KakaoApiDto.KakaoPlaceDetailsDto kakaoPlaceDetails = kakaoPlaceApiUtils.getKakaoPlaceDetailsDto(
-                        googlePlaceDetails.getFormattedAddress() + " " + googlePlaceDetails.getName()
+                        googlePlaceDetails.getFormattedAddress() + " " + googlePlaceDetails.getDisplayName().getName()
                 );
                 if (kakaoPlaceDetails == null) {
-                    log.info("Kakao Place Details Load Fail for location: " + googlePlaceDetails.getFormattedAddress() + " " + googlePlaceDetails.getName());
+                    log.error("Kakao Place Details Load Fail for location: " + googlePlaceDetails.getFormattedAddress() + " " + googlePlaceDetails.getDisplayName().getName());
                     continue;
                 }
 
                 // Restaurant 저장
-                Restaurant restaurant = saveRestaurant(location, kakaoPlaceDetails, googlePlaceDetails);
+                Restaurant restaurant = saveRestaurant(textQuery, kakaoPlaceDetails, googlePlaceDetails);
 
                 // Google Review 저장
                 saveGoogleReviews(googlePlaceDetails, restaurant);
@@ -85,16 +99,25 @@ public class DatabaseService {
                 saveMenuAndCategory(kakaoPlaceDetails, restaurant);
 
                 // Statistics 저장
+                seasonStatisticsService.updateSeasonStatistics(textQuery, restaurant.getId());
+                log.info("+++++++++++++++++++");
 
+                peopleStatisticsService.updatePeopleStatistics(textQuery, restaurant.getId());
+                log.info("+++++++++++++++++++");
+
+                costStatisticsService.updateCostStatistics(textQuery, restaurant.getId());
+
+                timeStatisticsService.updateTimeStatistics(textQuery, restaurant.getId());
             } catch (Exception e) {
-                log.info("Last Exception Occurs");
+                log.error("Last Exception Occurs");
             }
         }
     }
 
 
-    private Restaurant saveRestaurant(String location, KakaoApiDto.KakaoPlaceDetailsDto kakaoPlaceDetails,
-                                      GoogleApiDto.GooglePlaceDetailsDto googlePlaceDetails) {
+    private Restaurant saveRestaurant(String location,
+                                      KakaoApiDto.KakaoPlaceDetailsDto kakaoPlaceDetails,
+                                      GoogleApiDto.Place googlePlaceDetails) {
         StringBuilder openingHours = new StringBuilder();
 
         // getCurrentOpeningHours()의 결과가 null인지 확인
@@ -107,6 +130,12 @@ public class DatabaseService {
             openingHours.append("영업 시간 정보가 없습니다.");
         }
 
+        String photoUrl = "";
+        if (googlePlaceDetails.getPhoto() != null) {
+            photoUrl = PHOTO_URL + googlePlaceDetails.getPhoto().getPhotoName() +
+                    "/media?key=" + authkey + "&maxHeightPx=1000";
+        }
+
         Restaurant restaurant = Restaurant.builder()
                 .execLoc(location)
                 .addressName(kakaoPlaceDetails.getAddressName())
@@ -116,6 +145,7 @@ public class DatabaseService {
                 .x(kakaoPlaceDetails.getX())
                 .y(kakaoPlaceDetails.getY())
                 .storeId(kakaoPlaceDetails.getStoreId())
+                .photoUrl(photoUrl)
                 .rating(googlePlaceDetails.getRating())
                 .currentOpeningHours(openingHours.toString())
                 .build();
@@ -123,16 +153,16 @@ public class DatabaseService {
         return restaurantRepository.save(restaurant);
     }
 
-    private void saveGoogleReviews(GoogleApiDto.GooglePlaceDetailsDto googlePlaceDetails,
+    private void saveGoogleReviews(GoogleApiDto.Place googlePlaceDetails,
                                    Restaurant restaurant) {
-        List<GoogleApiDto.GooglePlaceDetailsDto.ReviewsInfo> reviews = googlePlaceDetails.getReviews();
+        List<GoogleApiDto.ReviewsInfo> reviews = googlePlaceDetails.getReviews();
         if (reviews != null) {
-            for (GoogleApiDto.GooglePlaceDetailsDto.ReviewsInfo review : reviews) {
+            for (GoogleApiDto.ReviewsInfo review : reviews) {
                 GoogleReviews reviewEntity = GoogleReviews.builder()
-                        .authorName(review.getAuthorName())
+                        .authorName(review.getAuthorAttribution().getAuthorName())
                         .rating(review.getRating())
                         .relativeTimeDescription(review.getRelativeTimeDescription())
-                        .text(review.getText())
+                        .text(review.getText().getText())
                         .restaurant(restaurant)
                         .build();
                 googleReviewsRepository.save(reviewEntity);
@@ -174,8 +204,8 @@ public class DatabaseService {
         StringBuilder sb = new StringBuilder();
         String categoryName = kakaoPlaceDetailsDto.getCategoryName();
         sb.append("# ");
-        for(char categoryArray : categoryName.toCharArray()) {
-            if(categoryArray == '>') sb.append("#");
+        for (char categoryArray : categoryName.toCharArray()) {
+            if (categoryArray == '>') sb.append("#");
             else sb.append(categoryArray);
         }
 

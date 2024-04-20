@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +28,14 @@ public class Restaurant {
     private String phone;
     private String placeName;
     private String placeUrl;
-    private String photo;
+
+    @Column(columnDefinition = "TEXT")
+    private String photoUrl;
 
     private String x;
     private String y;
 
-    private Integer rating;
+    private Double rating;
     private String storeId;
 
     @Column(columnDefinition = "TEXT")

@@ -1,6 +1,5 @@
 package com.example.publicdataserver.util;
 
-import com.example.publicdataserver.dto.GoogleApiDto;
 import com.example.publicdataserver.dto.KakaoApiDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,8 +11,6 @@ import java.io.IOException;
 
 @Component
 public class KakaoPlaceApiUtils {
-    private String authkey = "a892136411c8cdede160a2c3472a706d";
-
     WebClient webClient;
 
     public KakaoApiDto.KakaoPlaceDetailsDto getKakaoPlaceDetailsDto(String location) {

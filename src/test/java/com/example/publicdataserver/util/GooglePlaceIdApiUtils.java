@@ -1,5 +1,7 @@
 package com.example.publicdataserver.util;
 
+import com.example.publicdataserver.dto.GoogleApiDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
@@ -17,13 +19,6 @@ public class GooglePlaceIdApiUtils {
         this.objectMapper = objectMapper;
     }
 
-    /**
-     * @param location (위치 정보)
-     * @return placeId (가게 고유 ID 값)
-     */
-    public String getPlaceId(String location) {
-        return getGooglePlaceIdInfoDataSync(location).get("places").get(0).get("id").asText();
-    }
 
     public JsonNode getGooglePlaceIdInfoDataSync(String location) {
         String requestBody = "{\"textQuery\": \"" + location + "\"}";
@@ -33,13 +28,23 @@ public class GooglePlaceIdApiUtils {
                         .path("/v1/places:searchText")
                         .queryParam("languageCode", "ko")
                         .build())
-                .header("X-Goog-Api-Key", "AIzaSyBTcYS8E3PCQwOyHPDsrk2RM_GcTKsN24c")
-                .header("X-Goog-FieldMask", "places.id")
+                .header("X-Goog-Api-Key", "AIzaSyAIlAcqTIwnp9YOoygz3VsHYfNR578HsUY")
+                .header("X-Goog-FieldMask", "places.formatted_address,places.rating,places.regularOpeningHours.weekdayDescriptions,places.reviews.relativePublishTimeDescription,places.reviews.rating,places.reviews.text.text,places.reviews.authorAttribution.displayName,places.displayName.text,places.photos.name")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(requestBody))
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .onErrorMap(error -> new RuntimeException("Failed to retrieve data from Google Places API", error))
                 .block();
+    }
+
+    public GoogleApiDto convertJsonToGoogleApiDto(JsonNode jsonNode) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.treeToValue(jsonNode, GoogleApiDto.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

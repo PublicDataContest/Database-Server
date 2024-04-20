@@ -2,79 +2,111 @@ package com.example.publicdataserver.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.List;
 
+@Getter
+@ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GoogleApiDto {
+
+    @JsonProperty("places")
+    private List<Place> places;
+
+    public Place getFirstPlace() {
+        if (places != null && !places.isEmpty()) {
+            return places.get(0);
+        }
+        return null;
+    }
 
     @Getter
     @ToString
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class GooglePlaceDetailsDto {
-        @JsonProperty("formatted_address")
+    public static class Place {
+        @JsonProperty("formattedAddress")
         private String formattedAddress;
 
-        @JsonProperty("name")
-        private String name;
+        @JsonProperty("rating")
+        private Double rating;
 
-        @JsonProperty("current_opening_hours")
-        private CurrentOpeningHours currentOpeningHours;
+        @JsonProperty("regularOpeningHours")
+        private CurrentOpeningHours CurrentOpeningHours;
+
+        @JsonProperty("reviews")
+        private List<ReviewsInfo> reviews;
+
+        @JsonProperty("displayName")
+        private DisplayName displayName;
+
+        @JsonProperty("photos")
+        private Photo photo;
+
+        @JsonSetter("photos")
+        public void setFirstPhoto(List<Photo> photos) {
+            if (photos != null && !photos.isEmpty()) {
+                this.photo = photos.get(0);
+            }
+        }
+    }
+
+    @Getter
+    @ToString
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class CurrentOpeningHours {
+        @JsonProperty("weekdayDescriptions")
+        private List<String> weekdayText;
+    }
+
+    @Getter
+    @ToString
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ReviewsInfo {
+        @JsonProperty("relativePublishTimeDescription")
+        private String relativeTimeDescription;
 
         @JsonProperty("rating")
         private Integer rating;
 
-        @JsonProperty("photos")
-        private List<Photo> photos;
+        @JsonProperty("text")
+        private Text text;
 
-        private List<ReviewsInfo> reviews;
+        @JsonProperty("authorAttribution")
+        private AuthorAttribution authorAttribution;
+    }
 
-        @Getter
-        @ToString
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        public static class ReviewsInfo {
-            @JsonProperty("author_name")
-            private String authorName;
+    @Getter
+    @ToString
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Text {
+        @JsonProperty("text")
+        private String text;
+    }
 
-            @JsonProperty("profile_photo_url")
-            private String profilePhotoUrl;
+    @Getter
+    @ToString
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class AuthorAttribution {
+        @JsonProperty("displayName")
+        private String authorName;
+    }
 
-            @JsonProperty("rating")
-            private Integer rating;
+    @Getter
+    @ToString
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class DisplayName {
+        @JsonProperty("text")
+        private String name;
+    }
 
-            @JsonProperty("relative_time_description")
-            private String relativeTimeDescription;
-
-            @JsonProperty("text")
-            private String text;
-        }
-
-        @Getter
-        @ToString
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        public static class CurrentOpeningHours {
-            @JsonProperty("open_now")
-            private Boolean openNow;
-
-            @JsonProperty("weekday_text")
-            private List<String> weekdayText;
-        }
-
-        @Getter
-        @ToString
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        public static class Photo {
-            @JsonProperty("photo_reference")
-            private String photoReference;
-
-            @JsonProperty("height")
-            private Integer height;
-
-            @JsonProperty("width")
-            private Integer width;
-        }
+    @Getter
+    @ToString
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Photo {
+        @JsonProperty("name")
+        private String photoName;
     }
 }
