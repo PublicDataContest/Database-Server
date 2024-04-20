@@ -1,7 +1,8 @@
 package com.example.publicdataserver.util.test;
 
+import com.example.publicdataserver.dto.GoogleApiDto;
 import com.example.publicdataserver.util.GooglePlaceIdApiUtils;
-import com.example.publicdataserver.util.GooglePlaceDetailsApiUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -14,46 +15,27 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @Slf4j
 public class GoogleApiUtilsTest {
-
     @Autowired
-    private GooglePlaceIdApiUtils googleApiUtils;
+    private GooglePlaceIdApiUtils target;
 
     @Test
-    @DisplayName("Google Places API 텍스트 검색 테스트")
-    public void testSearchPlacesByText() {
+    @DisplayName("API_TEST")
+    public void API_TEST() throws JsonProcessingException {
         // given
-        String query = "라그릴리아광화문점(종로구 청계천로 11)";
+        String textQuery = "신씨네(중구 서소문로11길 2 2층)";
 
         // when
-        JsonNode result = googleApiUtils.getGooglePlaceIdInfoDataSync(query);
+        JsonNode jsonNode = target.getGooglePlaceIdInfoDataSync(textQuery);
+        GoogleApiDto dto = target.convertJsonToGoogleApiDto(jsonNode); // DTO 변환
+        GoogleApiDto.Place place = dto.getFirstPlace(); // 첫 번째 Place 추출
 
         // then
-        String placeId = result.get("places").get(0).get("id").asText();
-        log.info("Places = {}", placeId);
-    }
-
-    @Autowired
-    private GooglePlaceDetailsApiUtils googlePlaceInfoUtils;
-
-    @Test
-    @DisplayName("Google_장소_ID_기반_장소_검색")
-    public void Google_장소_ID_기반_장소_검색() {
-        // given
-        String query = "라그릴리아광화문점(종로구 청계천로 11)";
-        JsonNode placeIdNode = googleApiUtils.getGooglePlaceIdInfoDataSync(query);
-        log.info("PlaceIdNode = {}", placeIdNode.toString());
-        String placeId = placeIdNode.get("places").get(0).get("id").asText();
-        log.info("PlacesId = {}", placeId);
-
-        // when
-        JsonNode result = googlePlaceInfoUtils.parseJson(googlePlaceInfoUtils.getGooglePlaceInfoDataSync(placeId));
-        JsonNode ratingNode = result.path("result").path("rating");
-        if (!ratingNode.isMissingNode()) {
-            int rating = ratingNode.asInt();
-            log.info("rating = {}", rating);
+        log.info("jsonNode = {}", jsonNode.toString());
+        if (place != null) {
+            log.info("googleApiDto = {}", place.toString());
+        } else {
+            log.error("No place found in the response");
         }
-
-        // then
-        log.info("Result = {}", result.toString());
     }
+
 }

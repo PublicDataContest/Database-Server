@@ -12,8 +12,6 @@ import java.io.IOException;
 
 @Component
 public class KakaoPlaceApiUtils {
-    private String authkey = "a892136411c8cdede160a2c3472a706d";
-
     WebClient webClient;
 
     public KakaoApiDto.KakaoPlaceDetailsDto getKakaoPlaceDetailsDto(String location) {
