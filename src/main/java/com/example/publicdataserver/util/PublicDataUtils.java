@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,67 +20,42 @@ public class PublicDataUtils {
     @Value("${public.official.authKey}")
     private String authkey;
 
-    WebClient webClient;
+    private final WebClient webClient;
 
-    public JsonNode getPublicDataSync(int start, int end) {
-
-        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
-        factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
-
-        webClient = WebClient.builder()
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024)) // 16MB로 설정
+    public PublicDataUtils(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder
+                .baseUrl("http://openapi.seoul.go.kr:8088")
                 .build();
+    }
 
-        String responseBody = webClient.get()
+    public Mono<List<PublicDataDto>> getPublicDataAsDtoListAsync(int start, int end) {
+        return webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .scheme("http")
-                        .host("openapi.seoul.go.kr")
-                        .port(8088)
                         .path("/{KEY}/json/odExpense/{START_INDEX}/{END_INDEX}")
                         .build(authkey, start, end))
                 .retrieve()
                 .bodyToMono(String.class)
-                .block(); // 동기적으로 결과를 얻음
-        return parseJson(responseBody);
+                .flatMap(this::parseJsonToDtoList);
     }
 
-    private JsonNode parseJson(String responseBody) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readTree(responseBody);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public List<PublicDataDto> getPublicDataAsDtoList(int start, int end) {
-        JsonNode jsonNode = getPublicDataSync(start, end);
-
-        if (jsonNode != null && jsonNode.has("odExpense")) {
-            JsonNode arrayNode = jsonNode.get("odExpense").get("row");
-            if (arrayNode.isArray()) {
-                List<PublicDataDto> publicDataDtoList = new ArrayList<>();
-
-                for (JsonNode node : arrayNode) {
-                    PublicDataDto publicDataDto = convertJsonToPublicDto(node);
-                    publicDataDtoList.add(publicDataDto);
-                }
-
-                return publicDataDtoList;
-            }
-        }
-
-        return Collections.emptyList();
-    }
-
-    private PublicDataDto convertJsonToPublicDto(JsonNode jsonNode) {
+    private Mono<List<PublicDataDto>> parseJsonToDtoList(String responseBody) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.treeToValue(jsonNode, PublicDataDto.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
+            JsonNode rootNode = objectMapper.readTree(responseBody);
+            if (rootNode != null && rootNode.has("odExpense")) {
+                JsonNode arrayNode = rootNode.get("odExpense").get("row");
+                if (arrayNode.isArray()) {
+                    List<PublicDataDto> dtos = new ArrayList<>();
+                    for (JsonNode node : arrayNode) {
+                        PublicDataDto dto = objectMapper.treeToValue(node, PublicDataDto.class);
+                        dtos.add(dto);
+                    }
+                    return Mono.just(dtos);
+                }
+            }
+            return Mono.just(Collections.emptyList());
+        } catch (IOException e) {
+            return Mono.error(e);
         }
     }
 }

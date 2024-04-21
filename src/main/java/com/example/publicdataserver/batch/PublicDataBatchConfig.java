@@ -17,9 +17,13 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 @Configuration
 @RequiredArgsConstructor
@@ -47,50 +51,41 @@ public class PublicDataBatchConfig {
 
     @Bean
     public Tasklet tasklet1(PublicDataRepository publicDataRepository) {
-        return ((contribution, chunkContext) -> {
-//            for(int start = 1; start <= 56_000; start += 1000) {
-//                int end = start + 999;
-//                end = Math.min(end, 57_000);
-//
-//                List<PublicDataDto> publicDataDtos
-//                        = publicDataUtils.getPublicDataAsDtoList(start, end);
-//
-//                for(PublicDataDto publicDataDto : publicDataDtos) {
-//                    PublicData publicData = PublicData.builder()
-//                            .deptNm(publicDataDto.getDeptNm())
-//                            .execDt(publicDataDto.getExecDt())
-//                            .execLoc(publicDataDto.getExecLoc())
-//                            .targetNm(publicDataDto.getTargetNm())
-//                            .execAmount(publicDataDto.getExecAmount())
-//                            .execMonth(publicDataDto.getExecMonth())
-//                            .build();
-//
-//                    publicDataRepository.save(publicData);
-//                }
-//            }
+        return (contribution, chunkContext) -> {
+            int totalRecords = 57000;
+            int chunkSize = 1000;
+            List<Mono<Void>> tasks = new ArrayList<>();
 
-            int start = 500;
-            int end = 510;
+            for (int start = 1; start <= totalRecords; start += chunkSize) {
+                int end = Math.min(start + chunkSize - 1, totalRecords);
+                tasks.add(processChunk(start, end, publicDataRepository));
+            }
 
-                List<PublicDataDto> publicDataDtos
-                        = publicDataUtils.getPublicDataAsDtoList(start, end);
-
-                for(PublicDataDto publicDataDto : publicDataDtos) {
-                    PublicData publicData = PublicData.builder()
-                            .deptNm(publicDataDto.getDeptNm())
-                            .execDt(publicDataDto.getExecDt())
-                            .execLoc(publicDataDto.getExecLoc())
-                            .targetNm(publicDataDto.getTargetNm())
-                            .execAmount(publicDataDto.getExecAmount())
-                            .execMonth(publicDataDto.getExecMonth())
-                            .build();
-
-                    publicDataRepository.save(publicData);
-                }
-
+            // 모든 비동기 작업이 완료될 때까지 대기
+            Mono.when(tasks).block();
             return RepeatStatus.FINISHED;
-        });
+        };
     }
+
+    private Mono<Void> processChunk(int start, int end, PublicDataRepository publicDataRepository) {
+        return publicDataUtils.getPublicDataAsDtoListAsync(start, end)
+                .flatMapIterable(Function.identity())
+                .flatMap(dto -> savePublicData(dto, publicDataRepository))
+                .then();
+    }
+
+    private Mono<Void> savePublicData(PublicDataDto dto, PublicDataRepository repository) {
+        PublicData publicData = PublicData.builder()
+                .deptNm(dto.getDeptNm())
+                .execDt(dto.getExecDt())
+                .execLoc(dto.getExecLoc())
+                .targetNm(dto.getTargetNm())
+                .execAmount(dto.getExecAmount())
+                .execMonth(dto.getExecMonth())
+                .build();
+        return Mono.fromRunnable(() -> repository.save(publicData));
+    }
+
 
     @Bean
     public Step step2(JobRepository jobRepository, PlatformTransactionManager tm, Tasklet tasklet2) {
@@ -101,7 +96,6 @@ public class PublicDataBatchConfig {
 
     @Bean
     public Tasklet tasklet2(PublicDataRepository publicDataRepository) throws IOException {
-        System.out.println("heelo");
         return ((contribution, chunkContext) -> {
             databaseService.saveData();
 
