@@ -22,7 +22,7 @@ public class GoogleApiUtilsTest {
     @DisplayName("API_TEST")
     public void API_TEST() throws JsonProcessingException {
         // given
-        String textQuery = "신씨네(중구 서소문로11길 2)";
+        String textQuery = "세종원";
 
         // when
         JsonNode jsonNode = target.getGooglePlaceIdInfoDataSync(textQuery);

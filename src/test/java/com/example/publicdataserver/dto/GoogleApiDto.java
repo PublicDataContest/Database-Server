@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @ToString
@@ -33,6 +34,9 @@ public class GoogleApiDto {
         @JsonProperty("rating")
         private Double rating;
 
+        @JsonProperty("addressComponents")
+        private String longText;
+
         @JsonProperty("regularOpeningHours")
         private CurrentOpeningHours CurrentOpeningHours;
 
@@ -51,6 +55,27 @@ public class GoogleApiDto {
                 this.photo = photos.get(0);
             }
         }
+
+        @JsonSetter("addressComponents")
+        public void setAddressComponents(List<AddressComponents> addressComponents) {
+            if (addressComponents != null && !addressComponents.isEmpty()) {
+                Optional<AddressComponents> sublocalityComponent = addressComponents.stream()
+                        .filter(ac -> ac.getTypes().contains("sublocality_level_1"))
+                        .findFirst();
+                sublocalityComponent.ifPresent(ac -> this.longText = ac.getLongText());
+            }
+        }
+    }
+
+    @Getter
+    @ToString
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class AddressComponents {
+        @JsonProperty("longText")
+        private String longText;
+
+        @JsonProperty("types")
+        private List<String> types;
     }
 
     @Getter
@@ -69,13 +94,16 @@ public class GoogleApiDto {
         private String relativeTimeDescription;
 
         @JsonProperty("rating")
-        private Integer rating;
+        private Double rating;
 
         @JsonProperty("text")
         private Text text;
 
         @JsonProperty("authorAttribution")
         private AuthorAttribution authorAttribution;
+
+        @JsonProperty("name")
+        private String photoUrl;
     }
 
     @Getter
