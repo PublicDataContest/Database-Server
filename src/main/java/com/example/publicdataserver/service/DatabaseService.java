@@ -4,7 +4,7 @@ import com.example.publicdataserver.domain.PublicData;
 import com.example.publicdataserver.domain.restaurant.Category;
 import com.example.publicdataserver.domain.restaurant.Menu;
 import com.example.publicdataserver.domain.restaurant.Restaurant;
-import com.example.publicdataserver.domain.review.GoogleReviews;
+import com.example.publicdataserver.domain.review.KakaoReviews;
 import com.example.publicdataserver.dto.GoogleApiDto;
 import com.example.publicdataserver.dto.KakaoApiDto;
 import com.example.publicdataserver.repository.*;
@@ -29,12 +29,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class DatabaseService {
@@ -44,7 +45,7 @@ public class DatabaseService {
 
     private final PublicDataRepository publicDataRepository;
     private final RestaurantRepository restaurantRepository;
-    private final GoogleReviewsRepository googleReviewsRepository;
+    private final KakaoReviewsRepository kakaoReviewsRepository;
     private final MenuRepository menuRepository;
     private final CategoryRepository categoryRepository;
 
@@ -93,7 +94,7 @@ public class DatabaseService {
                 Restaurant restaurant = saveRestaurant(textQuery, kakaoPlaceDetails, googlePlaceDetails);
 
                 // Google Review 저장
-                saveGoogleReviews(googlePlaceDetails, restaurant);
+                saveKakaoReviews(kakaoPlaceDetails, restaurant);
 
                 // Menu, Category 저장
                 saveMenuAndCategory(kakaoPlaceDetails, restaurant);
@@ -114,13 +115,13 @@ public class DatabaseService {
         }
     }
 
-
-    private Restaurant saveRestaurant(String location,
-                                      KakaoApiDto.KakaoPlaceDetailsDto kakaoPlaceDetails,
-                                      GoogleApiDto.Place googlePlaceDetails) {
+    @Transactional
+    public Restaurant saveRestaurant(String location,
+                                     KakaoApiDto.KakaoPlaceDetailsDto kakaoPlaceDetails,
+                                     GoogleApiDto.Place googlePlaceDetails) {
         StringBuilder openingHours = new StringBuilder();
 
-        // getCurrentOpeningHours()의 결과가 null인지 확인
+        // getCurrentOpeningHours() 생성
         if (googlePlaceDetails.getCurrentOpeningHours() != null && googlePlaceDetails.getCurrentOpeningHours().getWeekdayText() != null) {
             for (String openingHour : googlePlaceDetails.getCurrentOpeningHours().getWeekdayText()) {
                 if (openingHours.length() > 0) openingHours.append("\n"); // 줄바꿈 추가
@@ -130,11 +131,17 @@ public class DatabaseService {
             openingHours.append("영업 시간 정보가 없습니다.");
         }
 
+        // 식당 이미지 URL 생성
         String photoUrl = "";
         if (googlePlaceDetails.getPhoto() != null) {
             photoUrl = PHOTO_URL + googlePlaceDetails.getPhoto().getPhotoName() +
                     "/media?key=" + authkey + "&maxHeightPx=1000";
         }
+
+        // 총 매출 수 계산
+        Long execAmount = publicDataRepository.sumExecAmountByExecLoc(location).longValue();
+        // 총 방문 횟수 계산
+        Long numberOfVisit = publicDataRepository.countByExecLoc(location);
 
         Restaurant restaurant = Restaurant.builder()
                 .execLoc(location)
@@ -148,29 +155,70 @@ public class DatabaseService {
                 .photoUrl(photoUrl)
                 .rating(googlePlaceDetails.getRating())
                 .currentOpeningHours(openingHours.toString())
+                .longText(googlePlaceDetails.getLongText())
+                .totalExecAmounts(execAmount)
+                .numberOfVisit(numberOfVisit)
                 .build();
 
         return restaurantRepository.save(restaurant);
     }
 
-    private void saveGoogleReviews(GoogleApiDto.Place googlePlaceDetails,
-                                   Restaurant restaurant) {
-        List<GoogleApiDto.ReviewsInfo> reviews = googlePlaceDetails.getReviews();
-        if (reviews != null) {
-            for (GoogleApiDto.ReviewsInfo review : reviews) {
-                GoogleReviews reviewEntity = GoogleReviews.builder()
-                        .authorName(review.getAuthorAttribution().getAuthorName())
-                        .rating(review.getRating())
-                        .relativeTimeDescription(review.getRelativeTimeDescription())
-                        .text(review.getText().getText())
-                        .restaurant(restaurant)
-                        .build();
-                googleReviewsRepository.save(reviewEntity);
-            }
-        }
+    // 방문 순서 List 반환 Method
+    private List<Restaurant> getRestaurantsWithMatchingLocation() {
+        List<PublicData> publicDataList = publicDataRepository.findAllByOrderByExecDtDesc();
+        List<Restaurant> matchedRestaurants = new ArrayList<>();
+
+        publicDataList.forEach(pd -> {
+            List<Restaurant> restaurants = restaurantRepository.findRestaurantsByExecLoc(pd.getExecLoc());
+            matchedRestaurants.addAll(restaurants);
+        });
+
+        return matchedRestaurants.stream().distinct().collect(Collectors.toList());
     }
 
-    private void saveMenuAndCategory(KakaoApiDto.KakaoPlaceDetailsDto kakaoPlaceDetailsDto,
+    @Transactional
+    public void saveKakaoReviews(KakaoApiDto.KakaoPlaceDetailsDto kakaoPlaceDetails,
+                                 Restaurant restaurant) throws IOException {
+        Long storeId = Long.valueOf(kakaoPlaceDetails.getStoreId());
+
+        Connection connect = Jsoup.connect(API_URL + storeId)
+                .header("Content-Type", "application/json")
+                .header("charset", "UTF-8")
+                .ignoreContentType(true);
+
+        String json = connect.execute().body();
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
+        JsonObject commentData = jsonObject.getAsJsonObject("comment");
+
+        commentData.getAsJsonArray("list").forEach(item -> {
+            JsonObject reviews = item.getAsJsonObject();
+            String contents = reviews.get("contents").getAsString();
+            String point = reviews.get("point").getAsString();
+            String username = reviews.get("username").getAsString();
+            String date = reviews.get("date").getAsString();
+
+            JsonArray photoList = reviews.get("photoList").getAsJsonArray();
+            String photoUrl = "";
+            if (photoList.size() > 0) {
+                photoUrl = photoList.get(0).getAsJsonObject().get("url").getAsString();
+            }
+
+            KakaoReviews kakaoReviews = KakaoReviews.builder()
+                    .authorName(username)
+                    .relativeTimeDescription(date)
+                    .rating(Double.parseDouble(point))
+                    .text(contents)
+                    .photoUrl(photoUrl)
+                    .restaurant(restaurant)
+                    .build();
+
+            kakaoReviewsRepository.save(kakaoReviews);
+        });
+    }
+
+    @Transactional
+    public void saveMenuAndCategory(KakaoApiDto.KakaoPlaceDetailsDto kakaoPlaceDetailsDto,
                                      Restaurant restaurant) throws IOException {
         Long storeId = Long.parseLong(kakaoPlaceDetailsDto.getStoreId());
 

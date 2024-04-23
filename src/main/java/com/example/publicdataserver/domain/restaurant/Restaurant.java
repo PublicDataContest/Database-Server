@@ -1,13 +1,12 @@
 package com.example.publicdataserver.domain.restaurant;
 
-import com.example.publicdataserver.domain.review.GoogleReviews;
+import com.example.publicdataserver.domain.review.KakaoReviews;
 import com.example.publicdataserver.domain.users.WishListRestaurant;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,7 @@ public class Restaurant {
     private String phone;
     private String placeName;
     private String placeUrl;
+    private String longText;
 
     @Column(columnDefinition = "TEXT")
     private String photoUrl;
@@ -38,11 +38,14 @@ public class Restaurant {
     private Double rating;
     private String storeId;
 
+    private Long totalExecAmounts;
+    private Long numberOfVisit;
+
     @Column(columnDefinition = "TEXT")
     private String currentOpeningHours;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GoogleReviews> reviews = new ArrayList<>();
+    private List<KakaoReviews> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Category> categories = new ArrayList<>();

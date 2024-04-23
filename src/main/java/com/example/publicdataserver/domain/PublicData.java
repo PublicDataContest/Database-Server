@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table
 @Getter
@@ -21,6 +23,6 @@ public class PublicData {
     private String execDt; // 집행일시
     private String execLoc; // 집행장소
     private String targetNm; // 인원 수
-    private String execAmount; // 집행금액
+    private BigDecimal execAmount; // 집행금액
     private String execMonth; // 집행 월
 }
