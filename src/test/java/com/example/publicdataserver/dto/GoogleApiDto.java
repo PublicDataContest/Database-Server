@@ -103,7 +103,7 @@ public class GoogleApiDto {
         private AuthorAttribution authorAttribution;
 
         @JsonProperty("name")
-        private String photoUrl;
+        private String name;
     }
 
     @Getter
