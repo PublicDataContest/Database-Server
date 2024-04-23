@@ -52,7 +52,7 @@ public class PublicDataBatchConfig {
     @Bean
     public Tasklet tasklet1(PublicDataRepository publicDataRepository) {
         return (contribution, chunkContext) -> {
-            int totalRecords = 57000;
+            int totalRecords = 10;
             int chunkSize = 1000;
             List<Mono<Void>> tasks = new ArrayList<>();
 

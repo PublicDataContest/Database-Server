@@ -22,6 +22,7 @@ public class Reviews {
     private String authorName; // 작성자 이름
     private Double rating; // 별점
     private String relativeTimeDescription; // 작성 시간
+    private String photoUrl;
 
     @Column(columnDefinition = "TEXT")
     private String text; // 리뷰 내용

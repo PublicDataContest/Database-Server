@@ -33,7 +33,7 @@ public class GooglePlaceApiUtils {
                         .queryParam("languageCode", "ko")
                         .build())
                 .header("X-Goog-Api-Key", authkey)
-                .header("X-Goog-FieldMask", "places.formatted_address,places.rating,places.regularOpeningHours.weekdayDescriptions,places.reviews.relativePublishTimeDescription,places.reviews.rating,places.reviews.text.text,places.reviews.authorAttribution.displayName,places.displayName.text,places.photos.name")
+                .header("X-Goog-FieldMask", "places.formatted_address,places.rating,places.regularOpeningHours.weekdayDescriptions,places.reviews.relativePublishTimeDescription,places.reviews.rating,places.reviews.text.text,places.reviews.authorAttribution.displayName,places.reviews.name,places.displayName.text,places.photos.name,places.addressComponents.longText,places.addressComponents.types")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(requestBody))
                 .retrieve()

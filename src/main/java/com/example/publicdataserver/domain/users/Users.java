@@ -1,6 +1,5 @@
 package com.example.publicdataserver.domain.users;
 
-import com.example.publicdataserver.domain.review.GoogleReviews;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

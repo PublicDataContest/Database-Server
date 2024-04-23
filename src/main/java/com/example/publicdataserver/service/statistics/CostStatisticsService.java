@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +47,9 @@ public class CostStatisticsService {
                 +peopleStatistics.get().getLower20()+peopleStatistics.get().getUpper20();
 
         for(PublicData data:publicData){
-            long execAmount=Long.parseLong(data.getExecAmount());
+            BigDecimal execAmountDecimal = data.getExecAmount(); // BigDecimal 객체를 가져옵니다.
+            long execAmount = execAmountDecimal.longValue(); // BigDecimal을 long으로 변환합니다.
+
             long cost = execAmount / totalPeople;
 
             if(cost<=10000){
