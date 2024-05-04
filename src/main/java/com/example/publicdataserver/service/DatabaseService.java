@@ -7,7 +7,6 @@ import com.example.publicdataserver.domain.restaurant.Restaurant;
 import com.example.publicdataserver.domain.review.KakaoReviews;
 import com.example.publicdataserver.dto.GoogleApiDto;
 import com.example.publicdataserver.dto.KakaoApiDto;
-import com.example.publicdataserver.dto.PriceModelDto;
 import com.example.publicdataserver.repository.*;
 import com.example.publicdataserver.service.statistics.CostStatisticsService;
 import com.example.publicdataserver.service.statistics.PeopleStatisticsService;
@@ -30,10 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -274,5 +270,21 @@ public class DatabaseService {
     @Transactional
     public void updateRestaurantPriceModel(List<String> telNos) {
         restaurantRepository.updateRestaurantPriceModelInBatch(telNos);
+
+        // 모든 레스토랑 가져오기
+        List<Restaurant> restaurants = restaurantRepository.findAll();
+
+        // 전체 레스토랑 중 1/3 랜덤하게 선택하기
+        Collections.shuffle(restaurants);
+        int selectedCount = restaurants.size() / 5;
+        List<Restaurant> selectedRestaurants = restaurants.subList(0, selectedCount);
+
+        // 선택된 레스토랑들의 전화번호 가져오기
+        List<String> phoneNumbers = selectedRestaurants.stream()
+                .map(Restaurant::getPhone)
+                .collect(Collectors.toList());
+
+        // 선택된 레스토랑들의 priceModel 값을 true로 업데이트
+        restaurantRepository.updateRestaurantPriceModelInBatch(phoneNumbers);
     }
 }
