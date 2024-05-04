@@ -276,7 +276,7 @@ public class DatabaseService {
 
         // 전체 레스토랑 중 1/3 랜덤하게 선택하기
         Collections.shuffle(restaurants);
-        int selectedCount = restaurants.size() / 5;
+        int selectedCount = restaurants.size() / 10;
         List<Restaurant> selectedRestaurants = restaurants.subList(0, selectedCount);
 
         // 선택된 레스토랑들의 전화번호 가져오기
