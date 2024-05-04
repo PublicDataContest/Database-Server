@@ -7,6 +7,7 @@ import com.example.publicdataserver.domain.restaurant.Restaurant;
 import com.example.publicdataserver.domain.review.KakaoReviews;
 import com.example.publicdataserver.dto.GoogleApiDto;
 import com.example.publicdataserver.dto.KakaoApiDto;
+import com.example.publicdataserver.dto.PriceModelDto;
 import com.example.publicdataserver.repository.*;
 import com.example.publicdataserver.service.statistics.CostStatisticsService;
 import com.example.publicdataserver.service.statistics.PeopleStatisticsService;
@@ -267,5 +268,10 @@ public class DatabaseService {
 
             categoryRepository.save(category);
         });
+    }
+
+    @Transactional
+    public void updateRestaurantPriceModel(List<String> telNos) {
+        restaurantRepository.updateRestaurantPriceModelInBatch(telNos);
     }
 }

@@ -1,8 +1,10 @@
 package com.example.publicdataserver.batch;
 
 import com.example.publicdataserver.domain.PublicData;
+import com.example.publicdataserver.dto.PriceModelDto;
 import com.example.publicdataserver.dto.PublicDataDto;
 import com.example.publicdataserver.repository.PublicDataRepository;
+import com.example.publicdataserver.repository.RestaurantRepository;
 import com.example.publicdataserver.service.DatabaseService;
 import com.example.publicdataserver.util.PublicDataUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +19,13 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Configuration
 @RequiredArgsConstructor
@@ -35,10 +37,12 @@ public class PublicDataBatchConfig {
     @Bean
     public Job exchangeJob(JobRepository jobRepository,
                            Step step1,
-                           Step step2) {
+                           Step step2,
+                           Step step3) {
         return new JobBuilder("publicDataJob", jobRepository)
                 .start(step1)
                 .next(step2)
+                .next(step3)
                 .build();
     }
 
@@ -58,7 +62,7 @@ public class PublicDataBatchConfig {
 
             for (int start = 1; start <= totalRecords; start += chunkSize) {
                 int end = Math.min(start + chunkSize - 1, totalRecords);
-                tasks.add(processChunk(start, end, publicDataRepository));
+                tasks.add(processChunk1(start, end, publicDataRepository));
             }
 
             // 모든 비동기 작업이 완료될 때까지 대기
@@ -67,7 +71,7 @@ public class PublicDataBatchConfig {
         };
     }
 
-    private Mono<Void> processChunk(int start, int end, PublicDataRepository publicDataRepository) {
+    private Mono<Void> processChunk1(int start, int end, PublicDataRepository publicDataRepository) {
         return publicDataUtils.getPublicDataAsDtoListAsync(start, end)
                 .flatMapIterable(Function.identity())
                 .flatMap(dto -> savePublicData(dto, publicDataRepository))
@@ -101,5 +105,43 @@ public class PublicDataBatchConfig {
 
             return RepeatStatus.FINISHED;
         });
+    }
+
+    @Bean
+    public Step step3(JobRepository jobRepository, PlatformTransactionManager tm, Tasklet tasklet3) {
+        return new StepBuilder("step3", jobRepository)
+                .tasklet(tasklet3, tm)
+                .build();
+    }
+
+    @Bean
+    public Tasklet tasklet3(RestaurantRepository restaurantRepository) throws IOException {
+        return ((contribution, chunkContext) -> {
+            int totalRecords = 2000;
+            int chunkSize = 1000;
+            List<Mono<Void>> tasks = new ArrayList<>();
+
+            for (int start = 1; start <= totalRecords; start += chunkSize) {
+                int end = Math.min(start + chunkSize - 1, totalRecords);
+                tasks.add(processChunk3(start, end, restaurantRepository));
+            }
+
+            // 모든 비동기 작업이 완료될 때까지 대기
+            Mono.when(tasks).block();
+            return RepeatStatus.FINISHED;
+        });
+    }
+
+    private Mono<Void> processChunk3(int start, int end, RestaurantRepository restaurantRepository) {
+        return publicDataUtils.getPriceModelDtoListAsync(start, end)
+                .flatMapIterable(Function.identity())
+                .collectList()
+                .flatMap(dtoList -> {
+                    List<String> telNos = dtoList.stream()
+                            .map(PriceModelDto::getSH_PHONE)
+                            .collect(Collectors.toList());
+                    return Mono.fromRunnable(() -> databaseService.updateRestaurantPriceModel(telNos));
+                })
+                .then();
     }
 }
