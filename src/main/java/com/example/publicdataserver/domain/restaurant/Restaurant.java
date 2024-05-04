@@ -44,7 +44,6 @@ public class Restaurant {
     @Column(columnDefinition = "TEXT")
     private String currentOpeningHours;
 
-    @Column(name = "priceModel", columnDefinition = "boolean default false")
     private boolean priceModel; // 착한가게
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)

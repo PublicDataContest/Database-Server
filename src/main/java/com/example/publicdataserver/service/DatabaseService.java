@@ -159,6 +159,7 @@ public class DatabaseService {
                 .longText(googlePlaceDetails.getLongText())
                 .totalExecAmounts(execAmount)
                 .numberOfVisit(numberOfVisit)
+                .priceModel(false)
                 .build();
 
         return restaurantRepository.save(restaurant);
